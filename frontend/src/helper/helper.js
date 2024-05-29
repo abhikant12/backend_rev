@@ -37,10 +37,14 @@ export async function getUser({ username }){
 /** register user function */
 export async function registerUser(credentials){
     try {
+        console.log("in api caller");
+
         const response = await axios.post(`/api/register`, credentials);
         const { success, message } = response.data;
 
         let { username, email } = credentials;
+
+        console.log("in api caller");
 
         if(success){
             const text = `Hello ${username}. You have registered Successfully`;
@@ -82,6 +86,8 @@ export async function generateOTP(username){
     try {
         const response = await axios.get('/api/generateOTP', { params : { username }});
         const { code, message , success} = response.data;
+
+        console.log(code);
           
         // send mail with the OTP
         if(success){

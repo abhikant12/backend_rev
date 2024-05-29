@@ -43,6 +43,8 @@ const register = async(req , res) => {
         
         const { username, password, profile, email } = req.body;      
         
+        console.log("in register controller");
+
         if(!username || !password || !email || !profile){
              return res.status(403).json({
                 success : false,

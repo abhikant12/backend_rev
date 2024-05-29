@@ -1,73 +1,89 @@
-import React, { useEffect } from 'react'
+import React, { useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
-import { useFormik } from 'formik';
-import { resetPasswordValidation } from '../helper/validate'
-import { resetPassword } from '../helper/helper'
+import { useNavigate } from 'react-router-dom';
+import { resetPassword } from '../helper/helper';
 import { useAuthStore } from '../store/store';
-import { useNavigate, Navigate } from 'react-router-dom';
-import useFetch from '../hooks/fetch.hook'
-
+import useFetch from '../hooks/fetch.hook';
 import styles from '../styles/Username.module.css';
 
-export default function Reset() {
+export default function Reset(){
 
-  const { username } = useAuthStore(state => state.auth);
+  const { username } = useAuthStore((state) => state.auth);
   const navigate = useNavigate();
-  const [{ isLoading, apiData, status, serverError }] = useFetch('createResetSession')
+  const [{ isLoading, apiData, status, serverError }] = useFetch('createResetSession');
+  const [formValues, setFormValues] = useState({
+    password: '',
+    confirm_pwd: ''
+  });
 
-  const formik = useFormik({
-    initialValues : {
-      password : 'admin@123',
-      confirm_pwd: 'admin@123'
-    },
-    validate : resetPasswordValidation,
-    validateOnBlur: false,
-    validateOnChange: false,
-    onSubmit : async values => {
-      try {
-        let { success , message} = await resetPassword({ username, password: values.password });
-        if(success){
-          toast.success(message)
-          return navigate('/password')
-        }  
-        else toast.error(message);
-      } catch (error) {
-        return toast.error(error.message);
-      }
-  }
-  })
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormValues({ ...formValues, [name]: value });
+  };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+     // Validate password
+     const specialCharacterRegex = /[!@#$%^&*(),.?":{}|<>]/;
 
-  if(isLoading) return <h1 className='text-2xl font-bold'>isLoading</h1>;
-  // if(serverError) return <h1 className='text-xl text-red-500'>{serverError.message}</h1>
-  // if(status && status !== 201) return <Navigate to={'/password'} replace={true}></Navigate>
+     if(!formValues.password || !formValues.confirm_pwd) toast.error("Both Password Required...!");
+     else if(formValues.password !== formValues.confirm_pwd) toast.error("Passwords do not match");
+     else if(formValues.password.includes(" ")) toast.error("Wrong Password...!");
+     else if(formValues.password.length < 4) toast.error("Password must be more than 4 characters long");
+     else if(!specialCharacterRegex.test(formValues.password)) toast.error("Password must have special character");
+     else{
+          try {
+            let { success, message } = await resetPassword({ username, password: formValues.password });
+            if(success) {
+              toast.success(message);
+              navigate('/password');
+            } else {
+              toast.error(message);
+            }
+          } catch (error) {
+            toast.error(error.message);
+          }
+        }
+  };
+
+  if(isLoading) return <h1 className='text-2xl font-bold'>Loading...</h1>;
 
   return (
     <div className="container mx-auto">
 
-      <Toaster position='top-center' reverseOrder={false}></Toaster>
+      <Toaster position='top-center' reverseOrder={false} />
 
       <div className='flex justify-center items-center h-screen'>
-        <div className={styles.glass} style={{ width : "50%"}}>
-
+        <div className={styles.glass} style={{ width: "50%" }}>
           <div className="title flex flex-col items-center">
             <h4 className='text-5xl font-bold'>Reset</h4>
-            <span className='py-4 text-xl w-2/3 text-center text-gray-500'>
-              Enter new password.
-            </span>
+            <span className='py-4 text-xl w-2/3 text-center text-gray-500'>Enter new password.</span>
           </div>
 
-          <form className='py-20' onSubmit={formik.handleSubmit}>
-              <div className="textbox flex flex-col items-center gap-6">
-                  <input {...formik.getFieldProps('password')} className={styles.textbox} type="text" placeholder='New Password' />
-                  <input {...formik.getFieldProps('confirm_pwd')} className={styles.textbox} type="text" placeholder='Repeat Password' />
-                  <button className={styles.btn} type='submit'>Reset</button>
-              </div>
-
+          <form className='py-20' onSubmit={handleSubmit}>
+            <div className="textbox flex flex-col items-center gap-6">
+              <input
+                name="password"
+                value={formValues.password}
+                onChange={handleInputChange}
+                className={styles.textbox}
+                type="password"
+                placeholder='New Password'
+              />
+              <input
+                name="confirm_pwd"
+                value={formValues.confirm_pwd}
+                onChange={handleInputChange}
+                className={styles.textbox}
+                type="password"
+                placeholder='Repeat New Password'
+              />
+              <button className={styles.btn} type='submit'>Reset</button>
+            </div>
           </form>
-
         </div>
       </div>
     </div>
-  )
+  );
 }
