@@ -8,7 +8,8 @@ import { useAuthStore } from '../store/store';
 import styles from '../styles/Username.module.css';
 import extend from '../styles/Profile.module.css';
 
-export default function Profile() {
+export default function Profile(){
+  
   const [{ isLoading, apiData, serverError }] = useFetch();
   const navigate = useNavigate();
   const [formValues, setFormValues] = useState({
@@ -35,7 +36,7 @@ export default function Profile() {
 
   const handleInputChange = (e) => {
     const { name, value, type, files } = e.target;
-    if (type === 'file') {
+    if(type === 'file'){
       const fileReader = new FileReader();
       fileReader.onload = () => {
         setFormValues({ ...formValues, profile: fileReader.result });
@@ -50,13 +51,11 @@ export default function Profile() {
     e.preventDefault();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!formValues.firstName || !formValues.lastName || !formValues.email || !formValues.address || !formValues.mobile) {
-      toast.error("All fields are required!");
-    } else if (formValues.firstName.includes(" ") || formValues.lastName.includes(" ") || formValues.email.includes(" ") || formValues.mobile.includes(" ")) {
-      toast.error("Wrong values!");
-    } else if (!emailRegex.test(formValues.email)) {
-      toast.error("Invalid email address format!");
-    } else {
+    if(!formValues.firstName || !formValues.lastName || !formValues.email || !formValues.address || !formValues.mobile) toast.error("All fields are required!");   
+    else if(formValues.firstName.includes(" ") || formValues.lastName.includes(" ") || formValues.email.includes(" ")) toast.error("Wrong values!");
+    else if((formValues.mobile.toString()).includes(" ")) toast.error("Mobile no does not contain space!");
+    else if(!emailRegex.test(formValues.email)) toast.error("Invalid email address format!");   
+    else{
       try {
         const { data } = await updateUser(formValues);
         console.log(data);
@@ -72,8 +71,8 @@ export default function Profile() {
     navigate('/');
   };
 
-  if (isLoading) return <h1 className='text-2xl font-bold'>Loading...</h1>;
-  if (serverError) return <h1 className='text-xl text-red-500'>{serverError.message}</h1>;
+  if(isLoading) return <h1 className='text-2xl font-bold'>Loading...</h1>;
+  if(serverError) return <h1 className='text-xl text-red-500'>{serverError.message}</h1>;
 
   return (
     <div className="container mx-auto">
@@ -88,6 +87,7 @@ export default function Profile() {
           </div>
 
           <form className='py-1' onSubmit={handleSubmit}>
+            
             <div className='profile flex justify-center py-4'>
               <label htmlFor="profile">
                 <img src={formValues.profile} className={`${styles.profile_img} ${extend.profile_img}`} alt="avatar" />
@@ -138,5 +138,16 @@ function isValidEmail(email) {
 \.[^\s@]+$ ensures that there is a dot (.) followed by one or more characters that are not whitespace or @, and the string ends after these characters.
 
 
+includes Method: The includes method is used to check if a string contains a specified substring. It returns true if the substring is found and false otherwise.
+So here (formValue.mobile) is a number so we can't use include;
+EX :- 
+const no = "989898";
+console.log(no.includes(" "));           // false;
+
+const no = 989898;
+console.log(no.includes(" "));           // Type Error;
+
+const no = 989898;
+console.log((no.toString()).includes(" "));    // false;
 
 */

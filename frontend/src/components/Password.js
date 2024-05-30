@@ -13,7 +13,6 @@ export default function Password(){
   const navigate = useNavigate();
   const { username } = useAuthStore(state => state.auth);
   const [{ isLoading, apiData, serverError }] = useFetch(`/user/${username}`);
-
   const [password, setPassword] = useState('');
 
 
@@ -180,12 +179,21 @@ export default function Password(){
   )
 }
 
+import { passwordValidate } from '../helper/validate';  // this fuction is imported in above code for validatiaon;
 
-
-
-
-
-
-
+export async function passwordValidate(values){
+  const specialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+  const errors = {};
+  if(!values.password){
+      errors.password = toast.error("Password Required...!");
+  } else if(values.password.includes(" ")){
+      errors.password = toast.error("Wrong Password...!");
+  }else if(values.password.length < 4){
+      errors.password = toast.error("Password must be more than 4 characters long");
+  }else if(!specialChars.test(values.password)){
+      errors.password = toast.error("Password must have special character");
+  }
+  return errors;
+}
 
 */

@@ -15,7 +15,7 @@ export default function Recovery(){
     e.preventDefault();                                      // Prevent default form submission behavior
     try {
       const { success, message } = await verifyOTP({ username, code: OTP });
-      if (success) {
+      if(success){
         toast.success(message);
         navigate('/reset');
       } else {

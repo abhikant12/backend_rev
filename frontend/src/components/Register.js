@@ -7,7 +7,8 @@ import { registerUser } from '../helper/helper';
 
 import styles from '../styles/Username.module.css';
 
-export default function Register() {
+export default function Register(){
+  
   const navigate = useNavigate();
   const [formValues, setFormValues] = useState({
     email: 'doyol56239@cnogs.com',
